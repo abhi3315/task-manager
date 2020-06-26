@@ -51,7 +51,7 @@ app.patch('/users/:id', async (req, res) => {
         if (!user) return res.status(404).send()
         res.send(user)
     } catch (e) {
-        res.status(400).send()
+        res.status(400).send(e)
     }
 })
 
@@ -82,6 +82,24 @@ app.get('/tasks/:id', async (req, res) => {
         res.send(task)
     } catch (e) {
         res.status(500).send()
+    }
+})
+
+
+app.patch('/tasks/:id', async (req, res) => {
+    const _id = req.params.id
+    const updates = Object.keys(req.body)
+    const validUpdates = ['description', 'completed']
+    const isValidUpdate = updates.every(update => validUpdates.includes(update))
+
+    if (!isValidUpdate) return res.status(400).send({ error: "Invalid Update!" })
+
+    try {
+        const task = await Task.findByIdAndUpdate(_id, req.body, { new: true, runValidators: true })
+        if (!task) return res.status(404).send()
+        res.send(task)
+    } catch (e) {
+        res.status(400).send(e)
     }
 })
 
